@@ -30,7 +30,7 @@ function print_banner {
 }
 
 # 1st stage - setup environment to wok's local repository and build it
-DEST_DIR="/tmp"
+DEST_DIR="${PROJECT_DIR}/tmp"
 [ ! -d ${DEST_DIR} ] && mkdir -p ${DEST_DIR}
 
 # copy wok local repository
