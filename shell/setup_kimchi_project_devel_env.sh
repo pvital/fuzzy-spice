@@ -3,16 +3,47 @@
 # Copyright (c) 2016 Paulo Vital <pvital.solutions@yahoo.com>
 #
 
-# This script setup the development environment to all projects of Kimchi
-# Project in a Fedora system.
+# This script setup the development environment to all modules of Kimchi
+# Project in a host system.
+#
+# Tested on Fedora 24 and RHEL7.2 (last update: 20160718)
 #
 
 PROJECT_DIR="${HOME}/Projects"
 
-function print_banner {
+function print_banner () {
     echo -e "***************************************************"
-    [ -n "${1}" ] && echo -e "***************** ${1}"
+    [ -n "$1" ] && echo -e "***************** $1"
     echo -e "***************************************************"
+}
+
+function my_exit () {
+    echo -e "Something get wrong, quiting..."
+    exit 1
+}
+
+function get_distro () {
+    local DISTRO=""
+    if [ -e /etc/os-release ]; then
+        DISTRO=$(grep "^ID=" /etc/os-release | cut -d "=" -f2)
+    else
+        DISTRO="none"
+    fi
+    echo $DISTRO
+}
+
+function check_rhel_repos () {
+    local ERR=0
+    for REPO in epel server-optional; do
+        RES=$(yum repolist | grep $REPO | wc -l)
+        if [ $RES -eq 0 ]; then
+            echo -e "Missing $REPO repository."
+            ERR=$((ERR+1))
+        fi
+    done
+    if [ $ERR -gt 0 ]; then
+        my_exit
+    fi
 }
 
 # 1st stage - install build and runtime dependencies
@@ -26,7 +57,7 @@ WOK_UI_DEVEL_DEPS="gcc-c++ python-devel python-pip"
 WOK_TESTS_DEPS="pyflakes python-pep8 python-requests"
 
 # GINGERBASE packages lists
-GINGERB_RUN_DEPS="rpm-python sos pyparted python-configobj python2-dnf"
+GINGERB_RUN_DEPS="rpm-python sos pyparted python-configobj"
 
 # KIMCHI packages lists
 KIMCHI_RUN_DEPS="libvirt-python libvirt libvirt-daemon-config-network qemu-kvm \
@@ -40,7 +71,21 @@ KIMCHI_TESTS_DEPS="python-mock"
 GINGER_RUN_DEPS="hddtemp libuser-python python-augeas python-netaddr \
                  python-ethtool python-ipaddr python-magic tuned lm_sensors"
 
-PKG_MNG_CMD="dnf install -y"
+DISTRO=$( get_distro )
+case $DISTRO in
+    "fedora")
+        PKG_MNG_CMD="dnf install -y"
+        GINGERB_RUN_DEPS="$GINGERB_RUN_DEPS python2-dnf"
+        ;;
+    "\"rhel\"")
+        # Check if additional repositories are enabled or not
+        check_rhel_repos
+        PKG_MNG_CMD="yum install -y"
+        WOK_RUN_DEPS="$WOK_RUN_DEPS python-ordereddict"
+        WOK_TESTS_DEPS="$WOK_TESTS_DEPS python-unittest2"
+        ;;
+    *)  my_exit;;
+esac
 
 ${PKG_MNG_CMD} \
 ${WOK_BUILD_DEPS} ${WOK_RUN_DEPS} ${WOK_UI_DEVEL_DEPS} ${WOK_TESTS_DEPS} \
