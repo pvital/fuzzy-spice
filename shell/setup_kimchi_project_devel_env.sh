@@ -6,7 +6,7 @@
 # This script setup the development environment to all modules of Kimchi
 # Project in a host system.
 #
-# Tested on Fedora 24 and RHEL7.2 (last update: 20160718)
+# Tested on Fedora 24, Ubuntu 16.04 and Debian 8.5 (last update: 20160906)
 #
 
 PROJECT_DIR="${HOME}/Projects"
@@ -17,7 +17,7 @@ function print_banner () {
     echo -e "***************************************************"
 }
 
-function my_exit () {
+function exit () {
     echo -e "Something get wrong, quiting..."
     exit 1
 }
@@ -48,43 +48,70 @@ function check_rhel_repos () {
 
 # 1st stage - install build and runtime dependencies
 
-# WOK packages lists
-WOK_BUILD_DEPS="gcc make autoconf automake gettext-devel git rpm-build libxslt"
-WOK_RUN_DEPS="python-cherrypy python-cheetah PyPAM m2crypto python-jsonschema \
-              python-psutil python-ldap python-lxml nginx openssl \
-              open-sans-fonts fontawesome-fonts logrotate"
-WOK_UI_DEVEL_DEPS="gcc-c++ python-devel python-pip"
-WOK_TESTS_DEPS="pyflakes python-pep8 python-requests"
+# distro's common packages lists for WOK
+WOK_BUILD_DEPS="gcc make autoconf automake git"
+WOK_RUN_DEPS="python-cheetah  python-jsonschema python-psutil python-ldap \
+             python-lxml nginx openssl logrotate"
+WOK_UI_DEVEL_DEPS="python-pip"
+WOK_TESTS_DEPS="pyflakes python-requests"
 
-# GINGERBASE packages lists
-GINGERB_RUN_DEPS="rpm-python sos pyparted python-configobj"
+# distro's common packages lists for GINGERBASE
+GINGERB_RUN_DEPS="python-configobj"
 
-# KIMCHI packages lists
-KIMCHI_RUN_DEPS="libvirt-python libvirt libvirt-daemon-config-network qemu-kvm \
-                 python-ethtool sos python-ipaddr nfs-utils pyparted \
-                 iscsi-initiator-utils python-libguestfs libguestfs-tools \
-                 python-websockify novnc spice-html5 python-configobj \
-                 python-magic python-paramiko python-pillow"
+# distro's common packages lists for KIMCHI
+KIMCHI_RUN_DEPS="qemu-kvm python-ethtool python-ipaddr libguestfs-tools novnc \
+                spice-html5 python-magic python-paramiko"
 KIMCHI_TESTS_DEPS="python-mock"
 
-# GINGER packages lists
-GINGER_RUN_DEPS="hddtemp libuser-python python-augeas python-netaddr \
-                 python-ethtool python-ipaddr python-magic tuned lm_sensors"
+# distro's common packages lists for GINGER
+GINGER_RUN_DEPS="hddtemp python-augeas python-netaddr"
 
 DISTRO=$( get_distro )
 case $DISTRO in
     "fedora")
         PKG_MNG_CMD="dnf install -y"
-        GINGERB_RUN_DEPS="$GINGERB_RUN_DEPS python2-dnf"
+        WOK_BUILD_DEPS="$WOK_BUILD_DEPS gettext-devel rpm-build libxslt"
+        WOK_RUN_DEPS="$WOK_RUN_DEPS python-cherrypy PyPAM m2crypto  \
+                     open-sans-fonts fontawesome-fonts"
+        WOK_UI_DEVEL_DEPS="$WOK_UI_DEVEL_DEPS gcc-c++ python-devel"
+        WOK_TESTS_DEPS="$WOK_TESTS_DEPS python-pep8"
+        GINGERB_RUN_DEPS="$GINGERB_RUN_DEPS rpm-python sos pyparted python2-dnf"
+        KIMCHI_RUN_DEPS="$KIMCHI_RUN_DEPS libvirt-python libvirt nfs-utils \
+                        libvirt-daemon-config-network python-pillow \
+                        iscsi-initiator-utils python-libguestfs \
+                        python-websockify"
+        GINGER_RUN_DEPS="$GINGER_RUN_DEPS libuser-python tuned lm_sensors"
         ;;
     "\"rhel\"")
         # Check if additional repositories are enabled or not
         check_rhel_repos
         PKG_MNG_CMD="yum install -y"
-        WOK_RUN_DEPS="$WOK_RUN_DEPS python-ordereddict"
-        WOK_TESTS_DEPS="$WOK_TESTS_DEPS python-unittest2"
+        WOK_BUILD_DEPS="$WOK_BUILD_DEPS gettext-devel rpm-build libxslt"
+        WOK_RUN_DEPS="$WOK_RUN_DEPS python-cherrypy PyPAM m2crypto  \
+                     open-sans-fonts fontawesome-fonts python-ordereddict"
+        WOK_UI_DEVEL_DEPS="$WOK_UI_DEVEL_DEPS gcc-c++ python-devel"
+        WOK_TESTS_DEPS="$WOK_TESTS_DEPS python-pep8 python-unittest2"
+        GINGERB_RUN_DEPS="$GINGERB_RUN_DEPS rpm-python sos pyparted python2-dnf"
+        KIMCHI_RUN_DEPS="$KIMCHI_RUN_DEPS libvirt-python libvirt nfs-utils \
+                        libvirt-daemon-config-network python-pillow \
+                        iscsi-initiator-utils python-libguestfs \
+                        python-websockify"
+        GINGER_RUN_DEPS="$GINGER_RUN_DEPS libuser-python tuned lm_sensors"
         ;;
-    *)  my_exit;;
+    "ubuntu"|"debian")
+        PKG_MNG_CMD="apt-get install -y"
+        WOK_BUILD_DEPS="$WOK_BUILD_DEPS gettext pkgconf xsltproc"
+        WOK_RUN_DEPS="$WOK_RUN_DEPS python-cherrypy3 python-pam \
+                     python-m2crypto fonts-font-awesome texlive-fonts-extra"
+        WOK_UI_DEVEL_DEPS="$WOK_UI_DEVEL_DEPS g++ python-dev"
+        WOK_TESTS_DEPS="$WOK_TESTS_DEPS pep8"
+        GINGERB_RUN_DEPS="$GINGERB_RUN_DEPS python-apt sosreport python-parted"
+        KIMCHI_RUN_DEPS="$KIMCHI_RUN_DEPS websockify python-libvirt nfs-common \
+                        libvirt-bin python-lxml open-iscsi python-guestfs"
+        KIMCHI_TESTS_DEPS="$KIMCHI_TESTS_DEPS bc"
+        GINGER_RUN_DEPS="$GINGER_RUN_DEPS python-libuser"
+        ;;
+    *) exit;;
 esac
 
 ${PKG_MNG_CMD} \
@@ -92,6 +119,10 @@ ${WOK_BUILD_DEPS} ${WOK_RUN_DEPS} ${WOK_UI_DEVEL_DEPS} ${WOK_TESTS_DEPS} \
 ${GINGERB_RUN_DEPS} ${KIMCHI_RUN_DEPS} ${KIMCHI_TESTS_DEPS} ${GINGER_RUN_DEPS}
 
 pip install cython libsass
+
+if [ ! -e /etc/libuser.conf ]; then
+    touch /etc/libuser.conf
+fi
 
 # 2nd stage - clone source code
 [ ! -d ${PROJECT_DIR} ] && mkdir -p ${PROJECT_DIR}
