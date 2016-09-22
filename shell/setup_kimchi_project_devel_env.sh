@@ -18,7 +18,7 @@ function print_banner () {
     echo -e "***************************************************"
 }
 
-function exit () {
+function my_exit () {
     echo -e "Something get wrong, quiting..."
     exit 1
 }
@@ -112,7 +112,7 @@ case $DISTRO in
         KIMCHI_TESTS_DEPS="$KIMCHI_TESTS_DEPS bc"
         GINGER_RUN_DEPS="$GINGER_RUN_DEPS python-libuser"
         ;;
-    *) exit;;
+    *) my_exit;;
 esac
 
 ${PKG_MNG_CMD} \
