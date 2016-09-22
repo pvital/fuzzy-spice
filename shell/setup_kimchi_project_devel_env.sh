@@ -6,7 +6,8 @@
 # This script setup the development environment to all modules of Kimchi
 # Project in a host system.
 #
-# Tested on Fedora 24, Ubuntu 16.04 and Debian 8.5 (last update: 20160906)
+# Tested on Fedora 24, Ubuntu 16.04, Debian 8.5 and CentOS 7
+# (last update: 20160922)
 #
 
 PROJECT_DIR="${HOME}/Projects"
@@ -82,7 +83,7 @@ case $DISTRO in
                         python-websockify"
         GINGER_RUN_DEPS="$GINGER_RUN_DEPS libuser-python tuned lm_sensors"
         ;;
-    "\"rhel\"")
+    "\"rhel\""|"\"centos\"")
         # Check if additional repositories are enabled or not
         check_rhel_repos
         PKG_MNG_CMD="yum install -y"
