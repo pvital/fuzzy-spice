@@ -35,7 +35,11 @@ function get_distro () {
 
 function check_rhel_repos () {
     local ERR=0
-    for REPO in epel server-optional; do
+    local REPOLIST="epel"
+    if [ $( get_distro ) == "\"rhel\"" ]; then
+        local REPOLIST="epel server-optional"
+    fi
+    for REPO in $REPOLIST; do
         RES=$(yum repolist | grep $REPO | wc -l)
         if [ $RES -eq 0 ]; then
             echo -e "Missing $REPO repository."
