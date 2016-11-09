@@ -21,6 +21,11 @@ function build {
     make
     rc=$?
     [ ${RC} != 0 ] && { echo -e "Error during 'make'. Exiting..."; exit 1; }
+
+    make -C ui/css css
+    rc=$?
+    [ ${RC} != 0 ] && { echo -e "Error during 'make' UI SCSS. Exiting..."; exit 1; }
+
 }
 
 function print_banner {
