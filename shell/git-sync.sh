@@ -13,7 +13,7 @@ git checkout master > /dev/null 2>&1
 [ ${?} -ne 0 ] && { echo -e "Error while checking out master branch."; exit 1; }
 
 # Check if there's a remote called 'upstream'
-RES=$(git remote | grep upstream | wc -l)
+RES=$(git remote | grep -w upstream | wc -l)
 [ ${RES} -ne 1 ] && { echo -e "There is no remote named 'upstream'."; exit 1; }
 
 # Fetch from upstream remote
