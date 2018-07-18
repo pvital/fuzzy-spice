@@ -4,7 +4,7 @@
 #
 
 # This script synchronizes a fork repository with it's upstream or source.
-# It assumes the fork repository was cloned locally as 'origin' and an 
+# It assumes the fork repository was cloned locally as 'origin' and an
 # additional remote to source repository was added as 'upstream'. Also all sync
 # will happen on top of local 'master' branch and pushed to 'origin/master'.
 
@@ -45,6 +45,6 @@ echo -e "Pushing updates to origin/master."
 git push origin master > /dev/null 2>&1
 [ ${?} -ne 0 ] && { echo -e "Could not push updates to origin/master."; exit 1;}
 
-# Updated! 
+# Updated!
 echo -e "origin/master is up to date."
 exit 0

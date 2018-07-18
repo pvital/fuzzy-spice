@@ -3,7 +3,7 @@ class HelloGroovyWorld {
 
 	static main(args) {
 		def x = 42
-		
+
 		def helloworld = {
 			println("Hello Grovvy World!!!!")
 		}
